@@ -18,6 +18,7 @@ export class PostCreateComponent implements OnInit {
   onAddPost(form: NgForm): void {
     const { title, content } = form.value;
     const post: Post = {
+      id: null,
       title,
       content,
     };
