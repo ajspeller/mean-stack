@@ -1,6 +1,26 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+
+const Post = require("./models/Post.model");
+
+mongoose
+  .connect(process.env.MONGO_DB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log(`Database connection success!`);
+  })
+  .catch((err) => {
+    console.log(`Database connection failure!`, err);
+  });
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -15,20 +35,43 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
 app.get("/api/posts", (req, res, next) => {
-  const posts = [
-    { id: 0, title: "post 1", content: "post 1 content" },
-    { id: 1, title: "post 2", content: "post 2 content" },
-    { id: 3, title: "post 3", content: "post 3 content" },
-  ];
-  res.status(200).json({ message: "get posts", posts });
+  Post.find()
+    .then((documents) => {
+      res.status(200).json({ message: "get posts", posts: documents });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json({ error: err });
+    });
 });
 
 app.post("/api/posts", (req, res, next) => {
-  res.status(201).json({ message: "post added successfully" });
+  const { title, content } = req.body;
+  const newPost = new Post({ title, content });
+  newPost
+    .save()
+    .then((post) => {
+      console.log(post);
+      res.status(201).json({ message: "post added successfully", post });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json({ error: err });
+    });
+});
+
+app.delete("/api/posts/:id", (req, res, next) => {
+  const { id } = req.params;
+  Post.deleteOne({ _id: id })
+    .then((result) => {
+      console.log(result);
+      res.status(200).json({ message: "Post deleted" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json({ error: err });
+    });
 });
 
 module.exports = app;
