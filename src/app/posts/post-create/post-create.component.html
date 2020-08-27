@@ -2,37 +2,39 @@
   <div *ngIf="isLoading" class="spinner">
     <div class="lds-hourglass"></div>
   </div>
-  <form (ngSubmit)="onAddPost(f)"
-        *ngIf="!isLoading"
-        #f="ngForm">
-  <mat-form-field>
-    <input matInput
-           placeholder="Title"
-           autocomplete="off"
-           [ngModel]="post?.title"
-           required
-           name="title"
-           id="title"
-           minlength="3"
-           #title="ngModel"
-           type="text">
-    <mat-error *ngIf="title.invalid">Please enter a post title</mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <textarea matInput
-              placeholder="Content"
-              autocomplete="off"
-              [ngModel]="post?.content"
-              required
-              name="content"
-              id="content"
-              #content="ngModel"
-              rows="6"></textarea>
-    <mat-error *ngIf="content.invalid">Please enter post content</mat-error>
-  </mat-form-field>
-  <button mat-raised-button
-          [disabled]="f.invalid"
-          color="accent"
-          type="submit">{{ mode === 'create' ? 'Save Post' : 'Update Post'}}</button>
+  <form [formGroup]="form"
+        (ngSubmit)="onSavePost()"
+        *ngIf="!isLoading">
+    <mat-form-field>
+      <input matInput
+            formControlName="title"
+            placeholder="Title"
+            autocomplete="off"
+            type="text">
+      <mat-error *ngIf="form.get('title').invalid">Please enter a post title</mat-error>
+    </mat-form-field>
+    <button mat-stroked-button
+            (click)="filePicker.click()"
+            type="button">Pick Image</button>
+    <input type="file"
+           (change)="onImagePicked($event)"
+           #filePicker>
+    <div *ngIf="imagePreview && form.get('image').valid"
+         class="image-preview">
+      <img [src]="imagePreview"
+           [alt]="form.value.title">
+    </div>
+    <mat-form-field>
+      <textarea matInput
+                formControlName="content"
+                placeholder="Content"
+                autocomplete="off"
+                rows="6"></textarea>
+      <mat-error *ngIf="form.get('content').invalid">Please enter post content</mat-error>
+    </mat-form-field>
+    <button mat-raised-button
+            [disabled]="this.form.invalid"
+            color="accent"
+            type="submit">{{ mode === 'create' ? 'Save Post' : 'Update Post'}}</button>
   </form>
 </mat-card>

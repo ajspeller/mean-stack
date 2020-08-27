@@ -1,28 +1,18 @@
-require("dotenv").config();
+require("./database/db");
 
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+const path = require("path");
 
 const postRoutes = require("./routes/post.routes");
 
 const { corsMiddleware } = require("./middleware/cors.middleware");
 
-mongoose
-  .connect(process.env.MONGO_DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log(`Database connection success!`);
-  })
-  .catch((err) => {
-    console.log(`Database connection failure!`, err);
-  });
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use("/images", express.static(path.join("backend/images")));
 
 app.use(corsMiddleware.cors);
 

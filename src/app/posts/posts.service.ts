@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Subject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { Post } from './Post.model';
 
@@ -20,7 +20,12 @@ export class PostsService {
     this.http
       .get<{
         message: string;
-        posts: { _id: string; title: string; content: string }[];
+        posts: {
+          _id: string;
+          title: string;
+          content: string;
+          imagePath: string;
+        }[];
       }>(`${this.url}/api/posts`)
       .pipe(
         map((postData) => {
@@ -29,6 +34,7 @@ export class PostsService {
               title: post.title,
               content: post.content,
               id: post._id,
+              imagePath: post.imagePath,
             };
           });
         })
@@ -43,12 +49,17 @@ export class PostsService {
     return this.http
       .get<{
         message: string;
-        post: { _id: string; title: string; content: string };
+        post: {
+          _id: string;
+          title: string;
+          content: string;
+          imagePath: string;
+        };
       }>(`${this.url}/api/posts/${id}`)
       .pipe(
         map((res) => {
-          const { _id, title, content } = res.post;
-          return { id: _id, title, content };
+          const { _id, title, content, imagePath } = res.post;
+          return { id: _id, title, content, imagePath };
         })
       );
   }
@@ -64,12 +75,22 @@ export class PostsService {
     });
   }
 
-  addPost(newPost: Post): void {
+  addPost(newPost: Post, image: File): void {
+    const postData = new FormData();
+    postData.append('id', newPost.id);
+    postData.append('title', newPost.title);
+    postData.append('content', newPost.content);
+    postData.append('image', image, newPost.title);
     this.http
       .post<{
         message: string;
-        post: { _id: string; title: string; content: string };
-      }>(`${this.url}/api/posts`, newPost)
+        post: {
+          _id: string;
+          title: string;
+          content: string;
+          imagePath: string;
+        };
+      }>(`${this.url}/api/posts`, postData)
       .subscribe((res) => {
         newPost = { ...newPost, id: res.post._id };
         this.posts.push(newPost);
@@ -77,14 +98,25 @@ export class PostsService {
       });
   }
 
-  updatePost(editedPost: Post): void {
+  updatePost(editedPost: Post, image: File | string): void {
+    let postData: Post | FormData;
+    if (typeof image === 'object') {
+      postData = new FormData();
+      postData.append('title', editedPost.title);
+      postData.append('content', editedPost.content);
+      postData.append('image', image, editedPost.title);
+    } else {
+      postData = { ...editedPost, imagePath: image } as Post;
+    }
+
     this.http
-      .put(`${this.url}/api/posts/${editedPost.id}`, editedPost)
+      .put(`${this.url}/api/posts/${editedPost.id}`, postData)
       .subscribe((res) => {
         const updatedPosts = [...this.posts];
         const oldPostIndex = updatedPosts.findIndex(
           (p) => p.id === editedPost.id
         );
+        const post: Post = { ...editedPost, imagePath: image as string };
         updatedPosts[oldPostIndex] = editedPost;
         this.posts = updatedPosts;
         this.postsUpdated.next([...this.posts]);

@@ -23,8 +23,13 @@ exports.postControllers = {
       });
   },
   createPost: (req, res, next) => {
+    const url = `${req.protocol}://${req.get("host")}`;
     const { title, content } = req.body;
-    const newPost = new Post({ title, content });
+    const newPost = new Post({
+      title,
+      content,
+      imagePath: `${url}/images/${req.file.filename}`,
+    });
     newPost
       .save()
       .then((post) => {
@@ -37,9 +42,14 @@ exports.postControllers = {
       });
   },
   updatePostById: (req, res, next) => {
+    let { imagePath } = req.body;
+    if (req.file) {
+      const url = `${req.protocol}://${req.get("host")}`;
+      imagePath = `${url}/images/${req.file.filename}`;
+    }
     const { id } = req.params;
     const { title, content } = req.body;
-    const post = new Post({ _id: id, title, content });
+    const post = new Post({ _id: id, title, content, imagePath });
     Post.updateOne({ _id: id }, post)
       .then((document) => {
         console.log(document);
