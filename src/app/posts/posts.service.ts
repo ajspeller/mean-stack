@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Subject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { Post } from './Post.model';
 
@@ -39,6 +39,20 @@ export class PostsService {
       });
   }
 
+  getPost(id: string): Observable<Post> {
+    return this.http
+      .get<{
+        message: string;
+        post: { _id: string; title: string; content: string };
+      }>(`${this.url}/api/posts/${id}`)
+      .pipe(
+        map((res) => {
+          const { _id, title, content } = res.post;
+          return { id: _id, title, content };
+        })
+      );
+  }
+
   getPostUpdateListener(): Observable<Post[]> {
     return this.postsUpdated.asObservable();
   }
@@ -59,6 +73,20 @@ export class PostsService {
       .subscribe((res) => {
         newPost = { ...newPost, id: res.post._id };
         this.posts.push(newPost);
+        this.postsUpdated.next([...this.posts]);
+      });
+  }
+
+  updatePost(editedPost: Post): void {
+    this.http
+      .put(`${this.url}/api/posts/${editedPost.id}`, editedPost)
+      .subscribe((res) => {
+        const updatedPosts = [...this.posts];
+        const oldPostIndex = updatedPosts.findIndex(
+          (p) => p.id === editedPost.id
+        );
+        updatedPosts[oldPostIndex] = editedPost;
+        this.posts = updatedPosts;
         this.postsUpdated.next([...this.posts]);
       });
   }

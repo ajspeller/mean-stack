@@ -1,11 +1,15 @@
 <mat-card>
+  <div *ngIf="isLoading" class="spinner">
+    <div class="lds-hourglass"></div>
+  </div>
   <form (ngSubmit)="onAddPost(f)"
+        *ngIf="!isLoading"
         #f="ngForm">
   <mat-form-field>
     <input matInput
            placeholder="Title"
            autocomplete="off"
-           ngModel
+           [ngModel]="post?.title"
            required
            name="title"
            id="title"
@@ -18,7 +22,7 @@
     <textarea matInput
               placeholder="Content"
               autocomplete="off"
-              ngModel
+              [ngModel]="post?.content"
               required
               name="content"
               id="content"
@@ -29,6 +33,6 @@
   <button mat-raised-button
           [disabled]="f.invalid"
           color="accent"
-          type="submit">Save Post</button>
+          type="submit">{{ mode === 'create' ? 'Save Post' : 'Update Post'}}</button>
   </form>
 </mat-card>
