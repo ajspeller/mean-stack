@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 
 const postRoutes = require("./routes/post.routes");
+const userRoutes = require("./routes/user.routes");
 
 const { corsMiddleware } = require("./middleware/cors.middleware");
 
@@ -17,5 +18,6 @@ app.use("/images", express.static(path.join("backend/images")));
 app.use(corsMiddleware.cors);
 
 app.use("/api/posts", postRoutes);
+app.use("/api/user", userRoutes);
 
 module.exports = app;

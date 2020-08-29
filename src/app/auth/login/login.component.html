@@ -1,0 +1,37 @@
+<mat-card>
+  <div *ngIf="isLoading" class="spinner">
+    <div class="lds-hourglass"></div>
+  </div>
+  <form #form="ngForm"
+        (ngSubmit)="onLogin(form)"
+        *ngIf="!isLoading">
+    <mat-form-field>
+      <input matInput
+             name="email"
+             ngModel
+             #emailInput="ngModel"
+             placeholder="Email"
+             autocomplete="off"
+             type="email"
+             required
+             email>
+      <mat-error *ngIf="emailInput.invalid">Please enter a email address</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput
+             name="password"
+             ngModel
+             #passwordInput="ngModel"
+             placeholder="Password"
+             autocomplete="off"
+             type="password"
+             required>
+      <mat-error *ngIf="passwordInput.invalid">Please enter a password</mat-error>
+    </mat-form-field>
+    <button *ngIf="!isLoading"
+            mat-raised-button
+            [disabled]="this.form.invalid"
+            color="accent"
+            type="submit">Login</button>
+  </form>
+</mat-card>

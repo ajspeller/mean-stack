@@ -3,6 +3,8 @@ const router = express.Router();
 
 const { postControllers } = require("../controllers/post.controllers");
 
+const checkAuth = require("../middleware/check-auth");
+
 const MIME_TYPE_MAP = {
   "image/png": "png",
   "image/jpeg": "jpg",
@@ -32,6 +34,7 @@ router
   .get("/", postControllers.getAllPosts)
   .post(
     "/",
+    checkAuth,
     multer({ storage: storage }).single("image"),
     postControllers.createPost
   );
@@ -40,9 +43,10 @@ router
   .get("/:id", postControllers.getPostById)
   .put(
     "/:id",
+    checkAuth,
     multer({ storage: storage }).single("image"),
     postControllers.updatePostById
   )
-  .delete("/:id", postControllers.deletePostById);
+  .delete("/:id", checkAuth, postControllers.deletePostById);
 
 module.exports = router;

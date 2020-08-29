@@ -12,7 +12,7 @@ exports.postControllers = {
     postQuery
       .then((documents) => {
         fetchedPosts = documents;
-        return Post.count();
+        return Post.countDocuments();
       })
       .then((count) => {
         res

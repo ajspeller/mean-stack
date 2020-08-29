@@ -7,6 +7,8 @@ import { map } from 'rxjs/operators';
 
 import { Post } from './Post.model';
 
+import { AuthService } from '../auth/auth.service';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,7 +17,11 @@ export class PostsService {
   private posts: Post[] = [];
   private url = 'http://localhost:3000';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   getPosts(postsPerPage: number, currentPage: number): void {
     const queryParams = `?pagesize=${postsPerPage}&page=${currentPage}`;
