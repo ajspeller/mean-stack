@@ -2,9 +2,22 @@ const Post = require("../models/Post.model");
 
 exports.postControllers = {
   getAllPosts: (req, res, next) => {
-    Post.find()
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const postQuery = Post.find();
+    let fetchedPosts;
+    if (pageSize && currentPage) {
+      postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
+    postQuery
       .then((documents) => {
-        res.status(200).json({ message: "get posts", posts: documents });
+        fetchedPosts = documents;
+        return Post.count();
+      })
+      .then((count) => {
+        res
+          .status(200)
+          .json({ message: "get posts", posts: fetchedPosts, maxPosts: count });
       })
       .catch((err) => {
         console.log(err);
